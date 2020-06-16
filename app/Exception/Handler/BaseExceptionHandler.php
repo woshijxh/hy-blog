@@ -55,7 +55,7 @@ class BaseExceptionHandler extends ExceptionHandler
             return $this->response->json($data);
         }
 
-        // token 验证
+        // Token 验证
         if ($throwable instanceof TokenValidException) {
             $this->stopPropagation();
             return $this->response->json($data);
