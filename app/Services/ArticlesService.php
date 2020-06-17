@@ -21,16 +21,19 @@ namespace App\Services;
 
 
 use App\Model\Article;
+use App\Traits\PageTrait;
 
 class ArticlesService
 {
+    use PageTrait;
+
     /**
      * @param $params
      * @return \Hyperf\Contract\LengthAwarePaginatorInterface
      */
     public function index($params)
     {
-        return Article::query()->paginate(intval($params['per_page'] ?? 20));
+        return $this->paginateData(Article::paginate(intval($params['per_page'] ?? 20)));
     }
 
     /**
@@ -40,12 +43,11 @@ class ArticlesService
      */
     public function store($params, $userId)
     {
-        $article = new Article();
-        $article->tag = $params['tag'];
-        $article->slug = $params['slug'];
-        $article->like = rand(1, 1000);
-        $article->title = $params['title'];
-        $article->author = $userId;
+        $article          = new Article();
+        $article->tag     = $params['tag'];
+        $article->like    = rand(1, 1000);
+        $article->title   = $params['title'];
+        $article->author  = $userId;
         $article->content = $params['content'];
         return $article->save();
     }
@@ -58,14 +60,13 @@ class ArticlesService
     public function update($params, $userId)
     {
         $article = Article::find($params['id']);
-        if (!$article) {
+        if ( !$article ) {
             return false;
         }
-        $article->tag = $params['tag'];
-        $article->slug = $params['slug'];
-        $article->like = rand(1, 1000);
-        $article->title = $params['title'];
-        $article->author = $userId;
+        $article->tag     = $params['tag'];
+        $article->like    = rand(1, 1000);
+        $article->title   = $params['title'];
+        $article->author  = $userId;
         $article->content = $params['content'];
         return $article->save();
     }
