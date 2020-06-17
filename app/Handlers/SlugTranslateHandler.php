@@ -17,69 +17,75 @@
  **/
 
 
-namespace App\Services;
+namespace App\Handlers;
 
 
-use App\Handlers\SlugTranslateHandler;
-use App\Model\Article;
-use App\Traits\PageTrait;
+use Hyperf\Di\Annotation\Inject;
+use Hyperf\Guzzle\ClientFactory;
+use Hyperf\Utils\ApplicationContext;
+use Overtrue\Pinyin\Pinyin;
 
-class ArticlesService
+class SlugTranslateHandler
 {
-    use PageTrait;
+    /**
+     * @Inject()
+     * @var Pinyin
+     */
+    public $pinyin;
 
     /**
-     * @param $params
-     * @return array
+     * @Inject()
+     * @var ClientFactory
      */
-    public function index($params)
-    {
-        return $this->paginateData(Article::paginate(intval($params['per_page'] ?? 20)));
-    }
+    public $clientFactory;
 
-    /**
-     * @param $params
-     * @param $userId
-     * @return bool
-     */
-    public function store($params, $userId)
-    {
-        $article          = new Article();
-        $article->tag     = $params['tag'];
-        $article->like    = rand(1, 1000);
-        $article->title   = $params['title'];
-        $article->author  = $userId;
-        $article->content = $params['content'];
-        $trans = new SlugTranslateHandler();
-        $trans->translate($article->title);
-        return $article->save();
-    }
+//    /**
+//     * @var \Hyperf\Guzzle\ClientFactory
+//     */
+//    public function __construct()
+//    {
+//        $this->clientFactory = $clientFactory;
+//    }
 
-    /**
-     * @param $params
-     * @param $userId
-     * @return bool
-     */
-    public function update($params, $userId)
+    public function translate($text)
     {
-        $article = Article::find($params['id']);
-        if ( !$article ) {
-            return false;
+        $key = config('services.baidu_translate.key');
+        $appId = config('services.baidu_translate.appid');
+        $apiUrl = 'http://api.fanyi.baidu.com/api/trans/vip/translate?';
+        $salt = time();
+
+        if (empty($appId) || empty($key)) {
+            return $this->pinyinConvert($text);
         }
-        $article->tag     = $params['tag'];
-        $article->like    = rand(1, 1000);
-        $article->title   = $params['title'];
-        $article->author  = $userId;
-        $article->content = $params['content'];
-        return $article->save();
+
+        $sign = md5($appId . $text . $salt . $key);
+
+        // 构建请求参数
+        $query = http_build_query([
+            "q"     => $text,
+            "from"  => "zh",
+            "to"    => "en",
+            "appid" => $appId,
+            "salt"  => $salt,
+            "sign"  => $sign,
+        ]);
+
+        // $options 等同于 GuzzleHttp\Client 构造函数的 $config 参数
+        $options = [];
+        // $client 为协程化的 GuzzleHttp\Client 对象
+        $this->clientFactory = ApplicationContext::getContainer()->get(ClientFactory::class);
+        $client = $this->clientFactory->create($options);
+        $response = $client->get($apiUrl . $query);
+        $result = json_decode($response->getBody(), true);
+        var_dump($result);
     }
 
     /**
-     * @param $id
-     * @return int
+     * @param $text
+     * @return string
      */
-    public function delete($id)
+    public function pinyinConvert($text)
     {
-        return Article::destroy($id);
+        return $this->pinyin->permalink($text);
     }
 }

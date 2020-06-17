@@ -37,6 +37,11 @@ class ArticlesRequest extends FormRequest
                     'content' => 'required',
                 ];
                 break;
+            case '/v1/article/delete':
+                return [
+                    'id' => 'required',
+                ];
+                break;
         }
     }
 

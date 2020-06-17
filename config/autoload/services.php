@@ -16,70 +16,9 @@
  * └─────┴────┴────┴───────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘ └───────┴───┴───┘
  **/
 
-
-namespace App\Services;
-
-
-use App\Handlers\SlugTranslateHandler;
-use App\Model\Article;
-use App\Traits\PageTrait;
-
-class ArticlesService
-{
-    use PageTrait;
-
-    /**
-     * @param $params
-     * @return array
-     */
-    public function index($params)
-    {
-        return $this->paginateData(Article::paginate(intval($params['per_page'] ?? 20)));
-    }
-
-    /**
-     * @param $params
-     * @param $userId
-     * @return bool
-     */
-    public function store($params, $userId)
-    {
-        $article          = new Article();
-        $article->tag     = $params['tag'];
-        $article->like    = rand(1, 1000);
-        $article->title   = $params['title'];
-        $article->author  = $userId;
-        $article->content = $params['content'];
-        $trans = new SlugTranslateHandler();
-        $trans->translate($article->title);
-        return $article->save();
-    }
-
-    /**
-     * @param $params
-     * @param $userId
-     * @return bool
-     */
-    public function update($params, $userId)
-    {
-        $article = Article::find($params['id']);
-        if ( !$article ) {
-            return false;
-        }
-        $article->tag     = $params['tag'];
-        $article->like    = rand(1, 1000);
-        $article->title   = $params['title'];
-        $article->author  = $userId;
-        $article->content = $params['content'];
-        return $article->save();
-    }
-
-    /**
-     * @param $id
-     * @return int
-     */
-    public function delete($id)
-    {
-        return Article::destroy($id);
-    }
-}
+return [
+    'baidu_translate' => [
+        'appid' => env('BAIDU_TRANSLATE_APPID'),
+        'key'   => env('BAIDU_TRANSLATE_KEY'),
+    ],
+];
