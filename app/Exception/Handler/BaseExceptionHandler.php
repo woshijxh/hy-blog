@@ -20,6 +20,7 @@
 namespace App\Exception\Handler;
 
 
+use App\Exception\ArticleException;
 use App\Exception\AuthException;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\ExceptionHandler\ExceptionHandler;
@@ -57,6 +58,11 @@ class BaseExceptionHandler extends ExceptionHandler
 
         // Token 验证
         if ($throwable instanceof TokenValidException) {
+            $this->stopPropagation();
+            return $this->response->json($data);
+        }
+
+        if ($throwable instanceof ArticleException) {
             $this->stopPropagation();
             return $this->response->json($data);
         }

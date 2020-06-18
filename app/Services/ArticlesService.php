@@ -20,7 +20,7 @@
 namespace App\Services;
 
 
-use App\Handlers\SlugTranslateHandler;
+use App\Exception\ArticleException;
 use App\Model\Article;
 use App\Traits\PageTrait;
 
@@ -46,12 +46,10 @@ class ArticlesService
     {
         $article          = new Article();
         $article->tag     = $params['tag'];
-        $article->like    = rand(1, 1000);
+        $article->like    = $params['like'] ?: rand(1, 100);
         $article->title   = $params['title'];
         $article->author  = $userId;
         $article->content = $params['content'];
-        $trans = new SlugTranslateHandler();
-        $trans->translate($article->title);
         return $article->save();
     }
 
@@ -64,10 +62,10 @@ class ArticlesService
     {
         $article = Article::find($params['id']);
         if ( !$article ) {
-            return false;
+            throw new ArticleException('文章不存在！');
         }
         $article->tag     = $params['tag'];
-        $article->like    = rand(1, 1000);
+        $article->like    = $params['like'] ?: rand(1, 100);
         $article->title   = $params['title'];
         $article->author  = $userId;
         $article->content = $params['content'];

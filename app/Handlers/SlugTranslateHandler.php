@@ -16,13 +16,13 @@
  * └─────┴────┴────┴───────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘ └───────┴───┴───┘
  **/
 
-
 namespace App\Handlers;
 
 
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Guzzle\ClientFactory;
 use Hyperf\Utils\ApplicationContext;
+use Hyperf\Utils\Str;
 use Overtrue\Pinyin\Pinyin;
 
 class SlugTranslateHandler
@@ -39,23 +39,15 @@ class SlugTranslateHandler
      */
     public $clientFactory;
 
-//    /**
-//     * @var \Hyperf\Guzzle\ClientFactory
-//     */
-//    public function __construct()
-//    {
-//        $this->clientFactory = $clientFactory;
-//    }
-
     public function translate($text)
     {
-        $key = config('services.baidu_translate.key');
-        $appId = config('services.baidu_translate.appid');
+        $key    = config('services.baidu_translate.key');
+        $appId  = config('services.baidu_translate.appid');
         $apiUrl = 'http://api.fanyi.baidu.com/api/trans/vip/translate?';
-        $salt = time();
+        $salt   = time();
 
-        if (empty($appId) || empty($key)) {
-            return $this->pinyinConvert($text);
+        if ( empty($appId) || empty($key) ) {
+            return var_dump($this->pinyinConvert($text));
         }
 
         $sign = md5($appId . $text . $salt . $key);
@@ -74,18 +66,27 @@ class SlugTranslateHandler
         $options = [];
         // $client 为协程化的 GuzzleHttp\Client 对象
         $this->clientFactory = ApplicationContext::getContainer()->get(ClientFactory::class);
-        $client = $this->clientFactory->create($options);
+
+        $client   = $this->clientFactory->create($options);
         $response = $client->get($apiUrl . $query);
-        $result = json_decode($response->getBody(), true);
-        var_dump($result);
+        $result   = json_decode($response->getBody(), true);
+
+        // 获取百度翻译数据
+        if ( isset($result['trans_result'][0]['dst']) ) {
+            return Str::slug($result['trans_result'][0]['dst']);
+        } else {
+            // 如果百度翻译没有结果，使用拼音作为后备计划。
+            return $this->pinyinConvert($text);
+        }
     }
 
     /**
+     * 汉字转拼音
      * @param $text
      * @return string
      */
     public function pinyinConvert($text)
     {
-        return $this->pinyin->permalink($text);
+        return Str::slug($this->pinyin->permalink($text));
     }
 }

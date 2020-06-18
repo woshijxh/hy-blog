@@ -20,20 +20,28 @@
 namespace App\Job;
 
 
+use App\Handlers\SlugTranslateHandler;
 use Hyperf\AsyncQueue\Job;
+use Hyperf\DbConnection\Db;
+use Hyperf\Utils\ApplicationContext;
 
 class SlugJob extends Job
 {
+    public $article;
 
-    public $params;
-
-    public function __construct($params)
+    /**
+     * SlugJob constructor.
+     * @param $article
+     */
+    public function __construct($article)
     {
-        $this->params = $params;
+        $this->article = $article;
     }
 
     public function handle()
     {
-
+        $trans = ApplicationContext::getContainer()->get(SlugTranslateHandler::class);
+        $slug  = $trans->translate($this->article['title']);
+        Db::table('articles')->where('id', $this->article['id'])->update(['slug' => $slug]);
     }
 }
