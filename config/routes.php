@@ -23,4 +23,6 @@ Router::addGroup('/v1', function () {
     Router::post('/article/store', 'App\Controller\ArticlesController@store');
     Router::post('/article/update', 'App\Controller\ArticlesController@update');
     Router::post('/article/delete', 'App\Controller\ArticlesController@delete');
+
+    Router::post('/upload', 'App\Controller\FileController@upload');
 }, ['middleware' => [Phper666\JwtAuth\Middleware\JwtAuthMiddleware::class, \App\Middleware\UserInfoMiddleware::class]]);

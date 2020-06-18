@@ -30,7 +30,8 @@
         "hyperf/translation": "^1.1",
         "hyperf/crontab": "^1.1",
         "hyperf/async-queue": "^1.1",
-        "overtrue/pinyin": "~4.0"
+        "overtrue/pinyin": "~4.0",
+        "hyperf/filesystem": "^1.1"
     },
     "require-dev": {
         "swoft/swoole-ide-helper": "^4.2",

@@ -27,4 +27,6 @@ return [
             LogLevel::WARNING,
         ],
     ],
+    'storage_path' => '/hy-blog/storage/upload/',
+    'host' => 'http://47.94.155.227:39002/',
 ];

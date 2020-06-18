@@ -11,7 +11,7 @@ namespace App\Exception;
 
 use Hyperf\Server\Exception\ServerException;
 
-class ArticleException extends ServerException
+class ServiceException extends ServerException
 {
 
 }

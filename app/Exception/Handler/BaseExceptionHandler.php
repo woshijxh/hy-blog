@@ -20,7 +20,7 @@
 namespace App\Exception\Handler;
 
 
-use App\Exception\ArticleException;
+use App\Exception\ServiceException;
 use App\Exception\AuthException;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\ExceptionHandler\ExceptionHandler;
@@ -62,7 +62,7 @@ class BaseExceptionHandler extends ExceptionHandler
             return $this->response->json($data);
         }
 
-        if ($throwable instanceof ArticleException) {
+        if ($throwable instanceof ServiceException) {
             $this->stopPropagation();
             return $this->response->json($data);
         }

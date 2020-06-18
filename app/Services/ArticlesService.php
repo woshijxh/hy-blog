@@ -20,7 +20,7 @@
 namespace App\Services;
 
 
-use App\Exception\ArticleException;
+use App\Exception\ServiceException;
 use App\Model\Article;
 use App\Traits\PageTrait;
 
@@ -62,7 +62,7 @@ class ArticlesService
     {
         $article = Article::find($params['id']);
         if ( !$article ) {
-            throw new ArticleException('文章不存在！');
+            throw new ServiceException('文章不存在！');
         }
         $article->tag     = $params['tag'];
         $article->like    = $params['like'] ?: rand(1, 100);
